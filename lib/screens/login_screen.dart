@@ -5,6 +5,7 @@ import 'package:flutter_svg/flutter_svg.dart';
 import '../widgets/input_fields.dart';
 import '../utils/colors.dart';
 import './signup_screen.dart';
+import '../resources/auth_methods.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({Key? key}) : super(key: key);
@@ -17,12 +18,21 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
 
+  bool isloading = false;
+
   @override
   void dispose() {
     // TODO: implement dispose
     super.dispose();
     emailController.dispose();
     passwordController.dispose();
+  }
+
+  void navigateToSignUp(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) {
+          return const SignUpScreen();
+        }));
   }
 
   @override
@@ -80,15 +90,32 @@ class _LoginScreenState extends State<LoginScreen> {
                     height: 15,
                   ),
                   ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () async {
+                      final String res = await AuthMethods().login(
+                        email: emailController.text,
+                        password: passwordController.text,
+                      );
+                      setState(() {
+                        isloading = true;
+                      });
+                      print(res);
+                      setState(() {
+                        isloading = false;
+                      });
+                    },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: Colors.red,
                     ),
-                    child: const Text(
-                      "Login",
-                      style: TextStyle(
-                          color: Colors.white, fontWeight: FontWeight.w700),
-                    ),
+                    child: (isloading == true)
+                        ? const CircularProgressIndicator(
+                            color: Colors.white,
+                          )
+                        : const Text(
+                            "Login",
+                            style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w700),
+                          ),
                   ),
                 ],
               ),
@@ -104,9 +131,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     TextSpan(
                       recognizer: TapGestureRecognizer()
                         ..onTap = () {
-                          Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (context){
-                            return const SignUpScreen();
-                          }));
+                          navigateToSignUp(context);
                         },
                       text: "Sign Up",
                       style: const TextStyle(
@@ -122,4 +147,5 @@ class _LoginScreenState extends State<LoginScreen> {
       )),
     );
   }
+
 }

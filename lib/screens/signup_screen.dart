@@ -5,6 +5,7 @@ import 'package:flutter_svg/svg.dart';
 import '../widgets/input_fields.dart';
 import '../utils/colors.dart';
 import './login_screen.dart';
+import '../resources/auth_methods.dart';
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -16,7 +17,9 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController usernameController=TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
+
+  bool isloading = false;
 
   @override
   void dispose() {
@@ -25,6 +28,13 @@ class _SignUpScreenState extends State<SignUpScreen> {
     emailController.dispose();
     passwordController.dispose();
     usernameController.dispose();
+  }
+
+  void navigateToLogin(BuildContext context) {
+    Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) {
+          return const LoginScreen();
+        }));
   }
 
   @override
@@ -89,15 +99,32 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       height: 15,
                     ),
                     ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () async {
+                        final String res = await AuthMethods().signUp(
+                            email: emailController.text,
+                            password: passwordController.text,
+                            username: usernameController.text);
+                        setState(() {
+                          isloading = true;
+                        });
+                        print(res);
+                        setState(() {
+                          isloading = false;
+                        });
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                       ),
-                      child: const Text(
-                        "Login",
-                        style: TextStyle(
-                            color: Colors.white, fontWeight: FontWeight.w700),
-                      ),
+                      child: (isloading == true)
+                          ? const CircularProgressIndicator(
+                              color: Colors.white,
+                            )
+                          : const Text(
+                              "Sign Up",
+                              style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w700),
+                            ),
                     ),
                   ],
                 ),
@@ -114,10 +141,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                       TextSpan(
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                            Navigator.of(context).pushReplacement(
-                                MaterialPageRoute(builder: (context) {
-                              return const LoginScreen();
-                            }));
+                            navigateToLogin(context);
                           },
                         text: "Login",
                         style: const TextStyle(
@@ -137,4 +161,5 @@ class _SignUpScreenState extends State<SignUpScreen> {
       ),
     );
   }
+
 }
